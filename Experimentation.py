@@ -1,0 +1,151 @@
+# Lets import moviepy, lets also import numpy we will use it a some point
+from moviepy import *
+import numpy as np
+
+
+#################
+# VIDEO LOADING #
+#################
+# We load our video
+Qr_clip = VideoFileClip("Qr.MP4").subclipped(0, 2)  # Clip 1: First 2 seconds
+Interview_clip = VideoFileClip("Interview.MP4").subclipped(
+    0, 5
+)  # Clip 2: First 5 seconds
+Boarding_clip = VideoFileClip("Boarding.MP4").subclipped(
+    0, 5
+)  # Clip 3: First 5 seconds
+
+intro_text = TextClip(
+    text="Go Jump America presents",
+    font="Gilroy-Medium.ttf",
+    font_size=50,
+    color="#fff",
+    text_align="center",
+)
+Qr_text = TextClip(
+    text="Scan the QR code",
+    font="Gilroy-Medium.ttf",
+    font_size=50,
+    color="#fff",
+    text_align="center",
+)
+Interview_text = TextClip(
+    text="Interview with John",
+    font="Gilroy-Medium.ttf",
+    font_size=50,
+    color="#fff",
+    text_align="center",
+)
+
+Boarding_text = TextClip(
+    text="Boarding the plane",
+    font_size=50,
+    font="Gilroy-Medium.ttf",
+    color="#fff",
+    text_align="center",
+)
+
+logo_clip = ImageClip("1.png").resized(width=400)
+moviepy_clip = ImageClip("1.png").resized(width=300)
+
+intro_text = intro_text.with_duration(4).with_start(0)
+logo_clip = logo_clip.with_start(intro_text.start + 2).with_end(intro_text.end)
+
+Qr_clip = Qr_clip.with_start(logo_clip.end)
+Qr_text = Qr_text.with_start(Qr_clip.start).with_end(Qr_clip.end)
+
+Interview_clip = Interview_clip.with_start(Qr_clip.end)
+Interview_text = Interview_text.with_start(Interview_clip.start).with_end(
+    Interview_clip.end
+)
+
+Boarding_clip = Boarding_clip.with_start(Interview_clip.end)
+Boarding_text = Boarding_text.with_start(Boarding_clip.start).with_end(
+    Boarding_clip.end
+)
+
+
+######################
+# CLIPS POSITIONNING #
+######################
+# Now that we have set the timing of our different clips, we need to make sure they are in the right position
+# We will keep things simple, and almost always set center center for every texts
+
+intro_text = intro_text.with_position(("center", "center"))
+Qr_text = Qr_text.with_position(("center", "center"))
+Interview_text = Interview_text.with_position(("center", "center"))
+Boarding_text = Boarding_text.with_position(("center", "center"))
+
+
+intro_text = intro_text.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
+logo_clip = logo_clip.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
+
+Qr_text = Qr_text.with_effects([vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)])
+Qr_clip = Qr_clip.with_effects([vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)])
+
+Interview_text = Interview_text.with_effects(
+    [vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)]
+)
+Interview_clip = Interview_clip.with_effects(
+    [vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)]
+)
+
+
+###############
+# CLIP FILTER #
+###############
+# Lets finish by modifying our rambo clip to make it sepia
+
+
+# We will start by defining a function that turn a numpy image into sepia
+# It takes the image as numpy array in entry and return the modified image as output
+def sepia_filter(frame: np.ndarray):
+    # Sepia filter transformation matrix
+    # Sepia transform works by applying to each pixel of the image the following rules
+    # res_R = (R * .393) + (G *.769) + (B * .189)
+    # res_G = (R * .349) + (G *.686) + (B * .168)
+    # res_B = (R * .272) + (G *.534) + (B * .131)
+    #
+    # With numpy we can do that very efficiently by multiplying the image matrix by a transformation matrix
+    sepia_matrix = np.array(
+        [[0.393, 0.769, 0.189], [0.349, 0.686, 0.168], [0.272, 0.534, 0.131]]
+    )
+
+    # Convert the image to float32 format for matrix multiplication
+    frame = frame.astype(np.float32)
+
+    # Apply the sepia transformation
+    # .T is needed because multiplying matrix of shape (n,m) * (m,k) result in a matrix of shape (n,k)
+    # what we want is (n,m), so we must transpose matrix (m,k) to (k,m)
+    sepia_image = np.dot(frame, sepia_matrix.T)
+
+    # Because final result can be > 255, we limit the result to range [0, 255]
+    sepia_image = np.clip(sepia_image, 0, 255)
+
+    # Convert the image back to uint8 format, because we need integer not float
+    sepia_image = sepia_image.astype(np.uint8)
+
+    return sepia_image
+
+
+Interview_clip = Interview_clip.image_transform(sepia_filter)
+
+
+final_clip = CompositeVideoClip(
+    [
+        intro_text,
+        logo_clip,
+        Qr_clip,
+        Qr_text,
+        Interview_clip,
+        Interview_text,
+        Boarding_clip,
+        Boarding_text,
+    ],
+    size=(1920, 1080),
+)
+
+final_clip.preview(fps=10)
+
+
+final_clip.write_videofile("./result.mp4")
