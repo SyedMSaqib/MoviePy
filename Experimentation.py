@@ -15,12 +15,21 @@ Boarding_clip = VideoFileClip("Boarding.MP4").subclipped(
     0, 5
 )  # Clip 3: First 5 seconds
 
+Diving_clip = VideoFileClip("Diving.mp4").subclipped(30, 40)
+
+Tandem_clip = VideoFileClip("Tandem.mp4").subclipped(25, 73)
+
+End_clip = VideoFileClip("Diving.mp4").subclipped(42, 48)
+
+Audio_clip = AudioFileClip("audio.wav")
+
 intro_text = TextClip(
     text="Go Jump America presents",
     font="Gilroy-Medium.ttf",
     font_size=50,
     color="#fff",
     text_align="center",
+    size=(1280, 100),
 )
 Qr_text = TextClip(
     text="Scan the QR code",
@@ -28,13 +37,15 @@ Qr_text = TextClip(
     font_size=50,
     color="#fff",
     text_align="center",
+    size=(1280, 100)
 )
 Interview_text = TextClip(
-    text="Interview with John",
+    text="Interview with Sebastian Martinez",
     font="Gilroy-Medium.ttf",
     font_size=50,
     color="#fff",
     text_align="center",
+    size=(1280, 100)
 )
 
 Boarding_text = TextClip(
@@ -43,6 +54,15 @@ Boarding_text = TextClip(
     font="Gilroy-Medium.ttf",
     color="#fff",
     text_align="center",
+    size=(1280, 100)
+)
+Diving_text = TextClip(
+    text="Taking the Leap of a Lifetime!",
+    font_size=50,
+    font="Gilroy-Medium.ttf",
+    color="#fff",
+    text_align="center",
+    size=(1280, 100)
 )
 
 logo_clip = ImageClip("1.png").resized(width=400)
@@ -64,6 +84,14 @@ Boarding_text = Boarding_text.with_start(Boarding_clip.start).with_end(
     Boarding_clip.end
 )
 
+Diving_clip = Diving_clip.with_start(Boarding_clip.end)
+Diving_text = Diving_text.with_start(Diving_clip.start).with_end(Diving_clip.start + 4)
+
+Tandem_clip = Tandem_clip.with_start(Diving_clip.end)
+End_clip = End_clip.with_start(Tandem_clip.end)
+
+Audio_clip = Audio_clip.with_start(Diving_clip.start).with_end(End_clip.end)
+
 
 ######################
 # CLIPS POSITIONNING #
@@ -75,21 +103,24 @@ intro_text = intro_text.with_position(("center", "center"))
 Qr_text = Qr_text.with_position(("center", "center"))
 Interview_text = Interview_text.with_position(("center", "center"))
 Boarding_text = Boarding_text.with_position(("center", "center"))
+Diving_text = Diving_text.with_position(("center", "center"))
 
 
-intro_text = intro_text.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
-logo_clip = logo_clip.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
+intro_text = intro_text.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+logo_clip = logo_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
 
-Qr_text = Qr_text.with_effects([vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)])
-Qr_clip = Qr_clip.with_effects([vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)])
+Qr_text = Qr_text.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+Qr_clip = Qr_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
 
-Interview_text = Interview_text.with_effects(
-    [vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)]
-)
-Interview_clip = Interview_clip.with_effects(
-    [vfx.CrossFadeIn(0.5), vfx.CrossFadeOut(0.5)]
-)
+Interview_text = Interview_text.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+Interview_clip = Interview_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
 
+Diving_text = Diving_text.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
+Diving_clip = Diving_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+
+Tandem_clip = Tandem_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+
+End_clip = End_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
 
 ###############
 # CLIP FILTER #
@@ -128,7 +159,11 @@ def sepia_filter(frame: np.ndarray):
     return sepia_image
 
 
-Interview_clip = Interview_clip.image_transform(sepia_filter)
+Qr_clip = Qr_clip.image_transform(sepia_filter)
+
+Diving_clip = Diving_clip.without_audio()
+Tandem_clip = Tandem_clip.without_audio()
+End_clip = End_clip.without_audio()
 
 
 final_clip = CompositeVideoClip(
@@ -141,11 +176,15 @@ final_clip = CompositeVideoClip(
         Interview_text,
         Boarding_clip,
         Boarding_text,
+        Diving_clip,
+        Diving_text,
+        Tandem_clip,
+        End_clip,
     ],
-    size=(1920, 1080),
-)
+    size=(1280, 720),
+).with_audio(Audio_clip)
 
-final_clip.preview(fps=10)
+# final_clip.preview(fps=10)
 
 
 final_clip.write_videofile("./result.mp4")
