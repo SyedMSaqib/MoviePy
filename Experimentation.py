@@ -37,7 +37,7 @@ Qr_text = TextClip(
     font_size=50,
     color="#fff",
     text_align="center",
-    size=(1280, 100)
+    size=(1280, 100),
 )
 Interview_text = TextClip(
     text="Interview with Sebastian Martinez",
@@ -45,7 +45,7 @@ Interview_text = TextClip(
     font_size=50,
     color="#fff",
     text_align="center",
-    size=(1280, 100)
+    size=(1280, 100),
 )
 
 Boarding_text = TextClip(
@@ -54,7 +54,7 @@ Boarding_text = TextClip(
     font="Gilroy-Medium.ttf",
     color="#fff",
     text_align="center",
-    size=(1280, 100)
+    size=(1280, 100),
 )
 Diving_text = TextClip(
     text="Taking the Leap of a Lifetime!",
@@ -62,7 +62,7 @@ Diving_text = TextClip(
     font="Gilroy-Medium.ttf",
     color="#fff",
     text_align="center",
-    size=(1280, 100)
+    size=(1280, 100),
 )
 
 logo_clip = ImageClip("1.png").resized(width=400)
@@ -84,10 +84,10 @@ Boarding_text = Boarding_text.with_start(Boarding_clip.start).with_end(
     Boarding_clip.end
 )
 
-Diving_clip = Diving_clip.with_start(Boarding_clip.end)
-Diving_text = Diving_text.with_start(Diving_clip.start).with_end(Diving_clip.start + 4)
+# Diving_clip = Diving_clip.with_start(Boarding_clip.end)
 
-Tandem_clip = Tandem_clip.with_start(Diving_clip.end)
+Tandem_clip = Tandem_clip.with_start(Boarding_clip.end)
+Diving_text = Diving_text.with_start(Tandem_clip.start).with_end(Tandem_clip.start + 4)
 End_clip = End_clip.with_start(Tandem_clip.end)
 
 Audio_clip = Audio_clip.with_start(Diving_clip.start).with_end(End_clip.end)
@@ -161,9 +161,31 @@ def sepia_filter(frame: np.ndarray):
 
 Qr_clip = Qr_clip.image_transform(sepia_filter)
 
-Diving_clip = Diving_clip.without_audio()
+# Diving_clip = Diving_clip.without_audio()
 Tandem_clip = Tandem_clip.without_audio()
 End_clip = End_clip.without_audio()
+
+# Calculate the durations of the muted clips
+diving_duration = Diving_clip.duration
+tandem_duration = Tandem_clip.duration
+end_duration = End_clip.duration
+
+# Calculate when Tandem clip starts relative to the overall video
+tandem_start_time = (
+    Boarding_clip.end
+)  # This is when Tandem clip starts in the final video
+
+# Get the audio segments starting from when Tandem clip begins
+tandem_audio = Audio_clip.subclipped(0, Tandem_clip.duration).with_start(
+    tandem_start_time
+)
+end_audio = Audio_clip.subclipped(
+    Tandem_clip.duration, Tandem_clip.duration + End_clip.duration
+).with_start(Tandem_clip.end)
+
+# Attach the trimmed audio to the muted clips
+Tandem_clip = Tandem_clip.with_audio(tandem_audio)
+End_clip = End_clip.with_audio(end_audio)
 
 
 final_clip = CompositeVideoClip(
@@ -176,15 +198,15 @@ final_clip = CompositeVideoClip(
         Interview_text,
         Boarding_clip,
         Boarding_text,
-        Diving_clip,
+        # Diving_clip,
         Diving_text,
         Tandem_clip,
         End_clip,
     ],
     size=(1280, 720),
-).with_audio(Audio_clip)
+)
 
-# final_clip.preview(fps=10)
+final_clip.preview(fps=10)
 
 
 final_clip.write_videofile("./result.mp4")
