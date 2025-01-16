@@ -71,23 +71,24 @@ moviepy_clip = ImageClip("1.png").resized(width=300)
 intro_text = intro_text.with_duration(4).with_start(0)
 logo_clip = logo_clip.with_start(intro_text.start + 2).with_end(intro_text.end)
 
-Qr_clip = Qr_clip.with_start(logo_clip.end)
+Qr_clip = Qr_clip.with_start(logo_clip.end + 1)
 Qr_text = Qr_text.with_start(Qr_clip.start).with_end(Qr_clip.end)
 
-Interview_clip = Interview_clip.with_start(Qr_clip.end)
+Interview_clip = Interview_clip.with_start(Qr_clip.end + 1)
 Interview_text = Interview_text.with_start(Interview_clip.start).with_end(
     Interview_clip.end
 )
 
-Boarding_clip = Boarding_clip.with_start(Interview_clip.end)
+Boarding_clip = Boarding_clip.with_start(Interview_clip.end + 1)
 Boarding_text = Boarding_text.with_start(Boarding_clip.start).with_end(
     Boarding_clip.end
 )
 
 # Diving_clip = Diving_clip.with_start(Boarding_clip.end)
 
-Tandem_clip = Tandem_clip.with_start(Boarding_clip.end)
-Diving_text = Diving_text.with_start(Tandem_clip.start).with_end(Tandem_clip.start + 4)
+Tandem_clip = Tandem_clip.with_start(Boarding_clip.end + 1)
+Diving_text = Diving_text.with_duration(7)
+Diving_text = Diving_text.with_start(Tandem_clip.start + 2)
 End_clip = End_clip.with_start(Tandem_clip.end)
 
 Audio_clip = Audio_clip.with_start(Diving_clip.start).with_end(End_clip.end)
@@ -106,21 +107,35 @@ Boarding_text = Boarding_text.with_position(("center", "center"))
 Diving_text = Diving_text.with_position(("center", "center"))
 
 
-intro_text = intro_text.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
-logo_clip = logo_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+intro_text = intro_text.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
+logo_clip = logo_clip.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
 
-Qr_text = Qr_text.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
-Qr_clip = Qr_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+Qr_text = Qr_text.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
+Qr_clip = Qr_clip.with_effects(
+    [vfx.CrossFadeIn(1), vfx.CrossFadeOut(1), afx.AudioFadeIn(1), afx.AudioFadeOut(1)]
+)
 
-Interview_text = Interview_text.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
-Interview_clip = Interview_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+Interview_text = Interview_text.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
+Interview_clip = Interview_clip.with_effects(
+    [vfx.CrossFadeIn(1), vfx.CrossFadeOut(1), afx.AudioFadeIn(1), afx.AudioFadeOut(1)]
+)
 
+Boarding_clip = Boarding_clip.with_effects(
+    [vfx.CrossFadeIn(1), vfx.CrossFadeOut(1), afx.AudioFadeIn(1), afx.AudioFadeOut(1)]
+)
+
+# Diving_text = Diving_text.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
+Diving_clip = Diving_clip.with_effects(
+    [vfx.CrossFadeIn(1), vfx.CrossFadeOut(1), afx.AudioFadeIn(1), afx.AudioFadeOut(1)]
+)
 Diving_text = Diving_text.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
-Diving_clip = Diving_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
 
-Tandem_clip = Tandem_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+Tandem_clip = Tandem_clip.with_effects(
+    [vfx.CrossFadeIn(1), vfx.CrossFadeOut(1), afx.AudioFadeIn(1), afx.AudioFadeOut(1)]
+)
 
-End_clip = End_clip.with_effects([vfx.CrossFadeIn(2), vfx.CrossFadeOut(2)])
+End_clip = End_clip.with_effects([vfx.CrossFadeIn(1), vfx.CrossFadeOut(1)])
+
 
 ###############
 # CLIP FILTER #
@@ -171,23 +186,42 @@ tandem_duration = Tandem_clip.duration
 end_duration = End_clip.duration
 
 # Calculate when Tandem clip starts relative to the overall video
-tandem_start_time = (
-    Boarding_clip.end
-)  # This is when Tandem clip starts in the final video
+# tandem_start_time = (
+#     Boarding_clip.end
+# )  # This is when Tandem clip starts in the final video
+# logo_audio = Audio_clip.subclipped(0, logo_clip.duration).with_start(logo_clip.start)
+# qr_audio = Audio_clip.subclipped(
+#     logo_clip.duration, logo_clip.duration + Qr_clip.duration
+# ).with_start(logo_clip.end)
 
-# Get the audio segments starting from when Tandem clip begins
-tandem_audio = Audio_clip.subclipped(0, Tandem_clip.duration).with_start(
-    tandem_start_time
-)
-end_audio = Audio_clip.subclipped(
-    Tandem_clip.duration, Tandem_clip.duration + End_clip.duration
-).with_start(Tandem_clip.end)
+# interview_audio = Audio_clip.subclipped(
+#     logo_clip.duration + Qr_clip.duration,
+#     logo_clip.duration + Qr_clip.duration + Interview_clip.duration,
+# ).with_start(Qr_clip.end)
+# # Get the audio segments starting from when Tandem clip begins
 
-# Attach the trimmed audio to the muted clips
-Tandem_clip = Tandem_clip.with_audio(tandem_audio)
-End_clip = End_clip.with_audio(end_audio)
+# tandem_audio = Audio_clip.subclipped(
+#     logo_clip.duration + Qr_clip.duration + Interview_clip.duration,
+#     logo_clip.duration
+#     + Qr_clip.duration
+#     + Interview_clip.duration
+#     + Tandem_clip.duration,
+# ).with_start(Interview_clip.end)
+# end_audio = Audio_clip.subclipped(
+#     Tandem_clip.duration, Tandem_clip.duration + End_clip.duration
+# ).with_start(Tandem_clip.end)
+# Create the low volume version for the beginning
+beginning_audio = Audio_clip.subclipped(0, Tandem_clip.start)
+beginning_audio = beginning_audio.with_volume_scaled(0.03)  # 10% volume
+beginning_audio = beginning_audio.with_start(0)
 
-
+# Add fadeout to the end portion of the audio
+end_audio = Audio_clip.subclipped(Tandem_clip.start)
+end_audio = end_audio.with_effects(
+    [afx.AudioFadeOut(10)]
+)  # 2 second fadeout at the end
+end_audio = end_audio.with_start(Tandem_clip.start)
+# Now create the final clip with both audio tracks
 final_clip = CompositeVideoClip(
     [
         intro_text,
@@ -198,15 +232,23 @@ final_clip = CompositeVideoClip(
         Interview_text,
         Boarding_clip,
         Boarding_text,
-        # Diving_clip,
-        Diving_text,
         Tandem_clip,
+        Diving_text,
         End_clip,
     ],
     size=(1280, 720),
 )
 
-final_clip.preview(fps=10)
+# Add both audio tracks to the final clip
+final_audio = CompositeAudioClip(
+    [
+        final_clip.audio,  # This will include all the original clip audios
+        beginning_audio,  # Low volume background music
+        end_audio,  # Full volume background music
+    ]
+)
 
+final_clip = final_clip.with_audio(final_audio)
 
+final_clip.preview(fps=30)
 final_clip.write_videofile("./result.mp4")
